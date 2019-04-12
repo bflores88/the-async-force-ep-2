@@ -1,31 +1,38 @@
 "use strict";
 
+//error function
+function errorMessage (status, message) {
+  let errorMessage = document.createElement('h2');
+  errorMessage.innerHTML = `Error ${status} - ${JSON.parse(message).detail}`;
+  contentContainer.appendChild(errorMessage);
+}
+
+//get informations
 requestResourceButton.addEventListener('click', getInfo);
 
 function getInfo () {
   contentContainer.innerHTML = '';
-
-  if(typeof parseInt(resourceId.value) !== 'number'){
-    return console.log('false');
-  }
-
-  let num = resourceId.value;
+  let num = parseInt(resourceId.value);
 
   if(resourceType.value === 'people'){
 
     function peopleReqListener () {
-      let peopleObject = JSON.parse(this.responseText).results;
-      console.log(peopleObject);
+      if(this.status !== 200){
+        errorMessage(this.status, this.responseText);
+        return;
+      }
+
+      let peopleObject = JSON.parse(this.responseText);
 
       let newPerson = document.createElement('h2');
-      newPerson.innerHTML = peopleObject[num].name;
+      newPerson.innerHTML = peopleObject.name;
       contentContainer.appendChild(newPerson);
 
       let newGender = document.createElement('p');
-      newGender.innerHTML = 'Gender: ' + peopleObject[num].gender;
+      newGender.innerHTML = 'Gender: ' + peopleObject.gender;
       contentContainer.appendChild(newGender);
 
-      let speciesFinder = peopleObject[num].species[0].toString();
+      let speciesFinder = peopleObject.species[0].toString();
 
       function speciesReqListener () {
         let speciesFound = JSON.parse(this.responseText).name;
@@ -42,7 +49,7 @@ function getInfo () {
     
     const peopleReq = new XMLHttpRequest();
     peopleReq.addEventListener('load', peopleReqListener);
-    peopleReq.open('GET', 'https://swapi.co/api/people/');
+    peopleReq.open('GET', `https://swapi.co/api/people/${num}`);
     peopleReq.send();
   }
 
@@ -50,18 +57,23 @@ function getInfo () {
   if(resourceType.value === 'planets'){
 
     function planetReqListener () {
-      let planetObject = JSON.parse(this.responseText).results;
+      if(this.status !== 200){
+        errorMessage(this.status, this.responseText);
+        return;
+      }
+
+      let planetObject = JSON.parse(this.responseText);
 
       let newPlanet = document.createElement('h2');
-      newPlanet.innerHTML = planetObject[num].name;
+      newPlanet.innerHTML = planetObject.name;
       contentContainer.appendChild(newPlanet);
 
       let newTerrain = document.createElement('p');
-      newTerrain.innerHTML = 'Terrain: ' + planetObject[num].terrain;
+      newTerrain.innerHTML = 'Terrain: ' + planetObject.terrain;
       contentContainer.appendChild(newTerrain);
 
       let newPopulation = document.createElement('p');
-      newPopulation.innerHTML = 'Population: ' + planetObject[num].population;
+      newPopulation.innerHTML = 'Population: ' + planetObject.population;
       contentContainer.appendChild(newPopulation);
 
       let filmUL = document.createElement('ul');
@@ -72,13 +84,12 @@ function getInfo () {
       contentContainer.appendChild(filmUL);
 
       //film finder
-      let filmArr = planetObject[num].films;
+      let filmArr = planetObject.films;
       
       filmArr.forEach(elem => {
         
         function filmReqListener () {
           let filmName = JSON.parse(this.responseText).title;
-          console.log(filmName);
 
           let listFilm = document.createElement('li');
           listFilm.innerHTML = filmName;
@@ -94,7 +105,7 @@ function getInfo () {
 
     let planetReq = new XMLHttpRequest ();
     planetReq.addEventListener('load', planetReqListener);
-    planetReq.open('GET', 'https://swapi.co/api/planets/');
+    planetReq.open('GET', `https://swapi.co/api/planets/${num}/` );
     planetReq.send();
   };
 
@@ -102,25 +113,55 @@ function getInfo () {
   if(resourceType.value === 'starships'){
 
     function starshipReqListener () {
-      let starshipObject = JSON.parse(this.responseText).results;
-      console.log(starshipObject);
+      if(this.status !== 200){
+        errorMessage(this.status, this.responseText);
+        return;
+      }
+
+      let starshipObject = JSON.parse(this.responseText);
 
       let newName = document.createElement('h2');
-      newName.innerHTML = starshipObject[num].name;
+      newName.innerHTML = starshipObject.name;
       contentContainer.appendChild(newName);
 
       let newManufacturer = document.createElement('p');
-      newManufacturer.innerHTML = 'Manufacturer: ' + starshipObject[num].manufacturer;
+      newManufacturer.innerHTML = 'Manufacturer: ' + starshipObject.manufacturer;
       contentContainer.appendChild(newManufacturer);
 
       let newClass = document.createElement('p');
-      newClass.innerHTML = 'Starship Class: ' + starshipObject[num].starship_class;
+      newClass.innerHTML = 'Starship Class: ' + starshipObject.starship_class;
       contentContainer.appendChild(newClass);
+
+      let filmUL = document.createElement('ul');
+      filmUL.id = 'filmID';
+      filmUL.style.marginLeft = '5px';
+      filmUL.style.padding = '10px';
+      filmUL.innerHTML = 'Appeared in:'
+      contentContainer.appendChild(filmUL);
+
+      //film finder
+      let filmArr = starshipObject.films;
+      
+      filmArr.forEach(elem => {
+        
+        function filmReqListener () {
+          let filmName = JSON.parse(this.responseText).title;
+
+          let listFilm = document.createElement('li');
+          listFilm.innerHTML = filmName;
+          filmUL.appendChild(listFilm);
+        }
+
+        let filmReq = new XMLHttpRequest();
+        filmReq.addEventListener('load', filmReqListener);
+        filmReq.open('GET', elem);
+        filmReq.send();
+      })
     }
 
     let starshipReq = new XMLHttpRequest();
     starshipReq.addEventListener('load', starshipReqListener);
-    starshipReq.open('GET', 'https://swapi.co/api/starships/');
+    starshipReq.open('GET', `https://swapi.co/api/starships/${num}/`);
     starshipReq.send();
   }
 
