@@ -13,8 +13,9 @@ requestResourceButton.addEventListener('click', getInfo);
 function getInfo() {
   contentContainer.innerHTML = '';
   let num = parseInt(resourceId.value);
+  let type = resourceType.value;
 
-  if (resourceType.value === 'people') {
+  if (type === 'people') {
     function peopleReqListener() {
       if (this.status !== 200) {
         errorMessage(this.status, this.responseText);
@@ -52,7 +53,7 @@ function getInfo() {
     peopleReq.send();
   }
 
-  if (resourceType.value === 'planets') {
+  if (type === 'planets') {
     function planetReqListener() {
       if (this.status !== 200) {
         errorMessage(this.status, this.responseText);
@@ -105,7 +106,7 @@ function getInfo() {
     planetReq.send();
   }
 
-  if (resourceType.value === 'starships') {
+  if (type === 'starships') {
     function starshipReqListener() {
       if (this.status !== 200) {
         errorMessage(this.status, this.responseText);
